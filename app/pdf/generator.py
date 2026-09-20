@@ -41,8 +41,10 @@ class PDFGenerator:
     ) -> str:
         """Render newspaper HTML first, then print to PDF using Playwright Chromium."""
         today = datetime.now()
+        date_formatted = today.strftime("%d %B %Y")
         edition_id = today.strftime("EDITION_%Y%m%d")
         pdf_path = self.output_dir / f"{edition_id}.pdf"
+        named_pdf_path = self.output_dir / f"The Daily Brief — {date_formatted}.pdf"
 
         # 1. Render HTML edition using Jinja2 & Editorial CSS
         html_content, edition = self.html_generator.render_newspaper(
@@ -93,6 +95,9 @@ class PDFGenerator:
                 )
                 
                 with open(pdf_path, "wb") as f:
+                    f.write(pdf_bytes)
+                
+                with open(named_pdf_path, "wb") as f:
                     f.write(pdf_bytes)
                 
                 context.close()

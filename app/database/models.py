@@ -17,6 +17,7 @@ class Article(BaseModel):
     sector: str = "General"
     image_url: Optional[str] = None
     topics: List[str] = Field(default_factory=list)
+    is_primary_source: bool = False
     hash: str = ""
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
@@ -39,8 +40,11 @@ class Story(BaseModel):
     final_score: float = 0.0
     articles: List[Article] = Field(default_factory=list)
     sources: List[str] = Field(default_factory=list)
+    sources_with_urls: List[Dict[str, str]] = Field(default_factory=list)
     topics: List[str] = Field(default_factory=list)
     matched_watchlist: List[str] = Field(default_factory=list)
+    evidence_level: str = "HIGH CONFIDENCE"  # HIGH CONFIDENCE, MEDIUM CONFIDENCE, DEVELOPING
+    is_primary_source: bool = False
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     def model_post_init(self, __context):
@@ -54,6 +58,10 @@ class MarketSnapshot(BaseModel):
     value: str
     change: str
     is_positive: Optional[bool] = None
+    day_low: str = ""
+    day_high: str = ""
+    is_stale: bool = False
+    last_updated: str = ""
 
 
 class CommoditySnapshot(BaseModel):
@@ -62,6 +70,8 @@ class CommoditySnapshot(BaseModel):
     change: str
     is_positive: Optional[bool] = None
     driver_analysis: str = ""
+    is_stale: bool = False
+    last_updated: str = ""
 
 
 class GithubRepo(BaseModel):
@@ -104,3 +114,6 @@ class Edition(BaseModel):
     pdf_path: str = ""
     status: str = "generated"
     stories_count: int = 0
+    what_changed: List[str] = Field(default_factory=list)
+    source_health: Dict[str, str] = Field(default_factory=dict)
+    run_log: Dict[str, Any] = Field(default_factory=dict)

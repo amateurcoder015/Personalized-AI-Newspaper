@@ -55,8 +55,11 @@ class DatabaseManager:
                     relevance_score REAL,
                     final_score REAL,
                     sources TEXT,
+                    sources_with_urls TEXT DEFAULT '[]',
                     topics TEXT,
                     matched_watchlist TEXT,
+                    evidence_level TEXT DEFAULT 'HIGH CONFIDENCE',
+                    is_primary_source INTEGER DEFAULT 0,
                     created_at TEXT NOT NULL
                 )
             """)
@@ -81,7 +84,10 @@ class DatabaseManager:
                     html_path TEXT NOT NULL,
                     pdf_path TEXT DEFAULT '',
                     status TEXT NOT NULL,
-                    stories_count INTEGER DEFAULT 0
+                    stories_count INTEGER DEFAULT 0,
+                    what_changed TEXT DEFAULT '[]',
+                    source_health TEXT DEFAULT '{}',
+                    run_log TEXT DEFAULT '{}'
                 )
             """)
 
@@ -119,6 +125,28 @@ class DatabaseManager:
                     related_story TEXT
                 )
             """)
+
+            # Migrations for existing DBs
+            for col, col_type in [
+                ("evidence_level", "TEXT DEFAULT 'HIGH CONFIDENCE'"),
+                ("is_primary_source", "INTEGER DEFAULT 0"),
+                ("sources_with_urls", "TEXT DEFAULT '[]'")
+            ]:
+                try:
+                    cursor.execute(f"ALTER TABLE stories ADD COLUMN {col} {col_type}")
+                except sqlite3.OperationalError:
+                    pass
+
+            for col, col_type in [
+                ("what_changed", "TEXT DEFAULT '[]'"),
+                ("source_health", "TEXT DEFAULT '{}'"),
+                ("run_log", "TEXT DEFAULT '{}'")
+            ]:
+                try:
+                    cursor.execute(f"ALTER TABLE editions ADD COLUMN {col} {col_type}")
+                except sqlite3.OperationalError:
+                    pass
+
             conn.commit()
 
     # --- Cache Methods ---
@@ -214,8 +242,9 @@ class DatabaseManager:
                     INSERT OR REPLACE INTO stories (
                         id, headline, summary, why_it_matters, category, sector,
                         importance_score, relevance_score, final_score,
-                        sources, topics, matched_watchlist, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        sources, sources_with_urls, topics, matched_watchlist,
+                        evidence_level, is_primary_source, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     story.id,
                     story.headline,
@@ -227,8 +256,11 @@ class DatabaseManager:
                     story.relevance_score,
                     story.final_score,
                     json.dumps(story.sources),
+                    json.dumps(story.sources_with_urls),
                     json.dumps(story.topics),
                     json.dumps(story.matched_watchlist),
+                    story.evidence_level,
+                    1 if story.is_primary_source else 0,
                     story.created_at
                 ))
 
@@ -250,8 +282,9 @@ class DatabaseManager:
             try:
                 cursor.execute("""
                     INSERT OR REPLACE INTO editions (
-                        edition_id, date, generated_at, html_path, pdf_path, status, stories_count
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                        edition_id, date, generated_at, html_path, pdf_path, status, stories_count,
+                        what_changed, source_health, run_log
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     edition.edition_id,
                     edition.date,
@@ -259,7 +292,10 @@ class DatabaseManager:
                     edition.html_path,
                     edition.pdf_path,
                     edition.status,
-                    edition.stories_count
+                    edition.stories_count,
+                    json.dumps(edition.what_changed),
+                    json.dumps(edition.source_health),
+                    json.dumps(edition.run_log)
                 ))
                 conn.commit()
                 return True
@@ -294,6 +330,36 @@ class DatabaseManager:
                 ))
             return articles
 
+    def get_recent_stories(self, limit: int = 50) -> List[Story]:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM stories ORDER BY created_at DESC LIMIT ?", (limit,))
+            rows = cursor.fetchall()
+            stories = []
+            for r in rows:
+                stories.append(Story(
+                    id=r["id"],
+                    headline=r["headline"],
+                    summary=r["summary"] or "",
+                    why_it_matters=r["why_it_matters"] or "",
+                    category=r["category"] or "top_stories",
+                    sector=r["sector"] or "General",
+                    importance_score=r["importance_score"] or 0.0,
+                    relevance_score=r["relevance_score"] or 0.0,
+                    final_score=r["final_score"] or 0.0,
+                    sources=json.loads(r["sources"]) if r["sources"] else [],
+                    sources_with_urls=json.loads(r["sources_with_urls"]) if "sources_with_urls" in r.keys() and r["sources_with_urls"] else [],
+                    topics=json.loads(r["topics"]) if r["topics"] else [],
+                    matched_watchlist=json.loads(r["matched_watchlist"]) if r["matched_watchlist"] else [],
+                    evidence_level=r["evidence_level"] if "evidence_level" in r.keys() and r["evidence_level"] else "HIGH CONFIDENCE",
+                    is_primary_source=bool(r["is_primary_source"]) if "is_primary_source" in r.keys() else False,
+                    created_at=r["created_at"]
+                ))
+            return stories
+
+    def get_edition_stories(self, edition_id: str = "") -> List[Story]:
+        return self.get_recent_stories(limit=30)
+
     def get_editions(self, limit: int = 10) -> List[Edition]:
         with self.get_connection() as conn:
             cursor = conn.cursor()
@@ -309,6 +375,14 @@ class DatabaseManager:
                     html_path=r["html_path"],
                     pdf_path=r["pdf_path"] if "pdf_path" in r.keys() and r["pdf_path"] else "",
                     status=r["status"],
-                    stories_count=r["stories_count"]
+                    stories_count=r["stories_count"],
+                    what_changed=json.loads(r["what_changed"]) if "what_changed" in r.keys() and r["what_changed"] else [],
+                    source_health=json.loads(r["source_health"]) if "source_health" in r.keys() and r["source_health"] else {},
+                    run_log=json.loads(r["run_log"]) if "run_log" in r.keys() and r["run_log"] else {}
                 ) for r in rows
             ]
+
+    def get_latest_edition(self) -> Optional[Edition]:
+        editions = self.get_editions(limit=1)
+        return editions[0] if editions else None
+

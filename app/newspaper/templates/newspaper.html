@@ -37,7 +37,17 @@
                 {% set hero = top_stories[0] %}
                 <div class="hero-story-card">
                     <div>
-                        <span class="section-label red">TOP EDITORIAL LEAD</span>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                            <span class="section-label red">TOP EDITORIAL LEAD</span>
+                            <div>
+                                {% if hero.is_primary_source %}
+                                <span class="primary-source-badge">PRIMARY SOURCE</span>
+                                {% endif %}
+                                <span class="evidence-badge {% if 'HIGH' in hero.evidence_level %}high{% elif 'MEDIUM' in hero.evidence_level %}medium{% else %}developing{% endif %}">
+                                    {{ hero.evidence_level }}
+                                </span>
+                            </div>
+                        </div>
                         <h2 class="hero-headline">{{ hero.headline }}</h2>
                         <div class="hero-subheadline">{{ hero.summary[:160] }}...</div>
                         <p class="hero-summary">{{ hero.summary }}</p>
@@ -50,7 +60,16 @@
                         {% endif %}
                     </div>
                     <div class="story-footer-meta">
-                        <span>SOURCE: {{ hero.sources | join(', ') | upper if hero.sources else 'REUTERS' }}</span>
+                        <span>
+                            SOURCES: 
+                            {% if hero.sources_with_urls %}
+                                {% for s in hero.sources_with_urls[:2] %}
+                                    <a href="{{ s.url }}" target="_blank" style="color:#525866; text-decoration:underline;">{{ s.name }}</a>{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                {{ hero.sources | join(', ') | upper if hero.sources else 'REUTERS' }}
+                            {% endif %}
+                        </span>
                         {% if hero.articles and hero.articles[0].url %}
                         <a href="{{ hero.articles[0].url }}" target="_blank">READ ORIGINAL →</a>
                         {% else %}
@@ -89,7 +108,12 @@
                 {% for story in top_stories[1:4] %}
                 <div class="secondary-card">
                     <div>
-                        <div class="card-num">0{{ loop.index + 1 }}</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div class="card-num">0{{ loop.index + 1 }}</div>
+                            <span class="evidence-badge {% if 'HIGH' in story.evidence_level %}high{% elif 'MEDIUM' in story.evidence_level %}medium{% else %}developing{% endif %}" style="font-size:0.55rem;">
+                                {{ story.evidence_level }}
+                            </span>
+                        </div>
                         <h4>{{ story.headline }}</h4>
                         <p>{{ story.summary[:180] }}...</p>
                     </div>
@@ -112,22 +136,43 @@
 
 
     <!-- ===================================================================
-         PAGE 2: INDIA & ECONOMY + MARKETS DEEP DIVE
+         PAGE 2: WHAT CHANGED SINCE YESTERDAY + TOP STORIES
          =================================================================== -->
     <div class="newspaper-page" id="page-2">
         <div class="page-content">
             <div class="page-header-strip">
-                <h2>02 | INDIA & ECONOMY</h2>
+                <h2>02 | WHAT CHANGED SINCE YESTERDAY</h2>
+                <span class="header-meta">DAILY INTELLIGENCE & DELTA HIGHLIGHTS</span>
+            </div>
+
+            <div class="what-changed-card">
+                <div class="what-changed-header">
+                    <span class="what-changed-title">KEY DELTAS & DAY-OVER-DAY MOVEMENTS</span>
+                    <span style="font-size:0.65rem; font-weight:700; color:var(--accent-red); uppercase;">REAL-TIME INTELLIGENCE</span>
+                </div>
+                <ul class="what-changed-list">
+                    {% for bullet in what_changed %}
+                    <li>{{ bullet }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="page-header-strip" style="margin-top: 8px;">
+                <h2>03 | INDIA & ECONOMY</h2>
                 <span class="header-meta">MACROECONOMIC ANALYSIS</span>
             </div>
 
-            <!-- Ensure 3 stories always populate the India & Economy section -->
             {% set india_list = sections.india if (sections.india and sections.india|length >= 3) else (top_stories[4:7] if top_stories|length >= 7 else top_stories[:3]) %}
             <div class="india-stories-grid">
                 {% for story in india_list[:3] %}
                 <div class="editorial-story-card">
                     <div>
-                        <span class="section-label">MACRO / INDIA</span>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <span class="section-label">MACRO / INDIA</span>
+                            <span class="evidence-badge {% if 'HIGH' in story.evidence_level %}high{% elif 'MEDIUM' in story.evidence_level %}medium{% else %}developing{% endif %}" style="font-size:0.55rem;">
+                                {{ story.evidence_level }}
+                            </span>
+                        </div>
                         <h4>{{ story.headline }}</h4>
                         <p>{{ story.summary }}</p>
                         {% if story.why_it_matters %}
@@ -138,7 +183,13 @@
                         {% endif %}
                     </div>
                     <div class="story-footer-meta">
-                        <span>{{ story.sources[0] if story.sources else 'FINANCIAL EXPRESS' }}</span>
+                        <span>
+                            {% if story.sources_with_urls %}
+                                <a href="{{ story.sources_with_urls[0].url }}" target="_blank" style="color:#525866;">{{ story.sources_with_urls[0].name }}</a>
+                            {% else %}
+                                {{ story.sources[0] if story.sources else 'FINANCIAL EXPRESS' }}
+                            {% endif %}
+                        </span>
                         {% if story.articles and story.articles[0].url %}
                         <a href="{{ story.articles[0].url }}" target="_blank">READ →</a>
                         {% endif %}
@@ -146,9 +197,22 @@
                 </div>
                 {% endfor %}
             </div>
+        </div>
 
-            <div class="page-header-strip" style="margin-top: 10px;">
-                <h2>03 | FINANCIAL MARKETS</h2>
+        <footer class="page-footer">
+            <span>THE DAILY BRIEF • WHAT CHANGED & INDIA</span>
+            <span>PAGE 2 OF 8</span>
+        </footer>
+    </div>
+
+
+    <!-- ===================================================================
+         PAGE 3: FINANCIAL MARKETS & WHY MARKETS MOVED
+         =================================================================== -->
+    <div class="newspaper-page" id="page-3">
+        <div class="page-content">
+            <div class="page-header-strip">
+                <h2>04 | FINANCIAL MARKETS</h2>
                 <span class="header-meta">EQUITIES • BONDS • CURRENCIES</span>
             </div>
 
@@ -176,8 +240,19 @@
                 {% endfor %}
             </div>
 
+            {% if market_drivers and market_drivers|length > 0 %}
+            <div class="why-markets-moved-box">
+                <div class="why-markets-moved-title">WHY DID MARKETS MOVE TODAY? (INTELLIGENCE ANALYSIS)</div>
+                <ul style="padding-left: 14px; line-height:1.45;">
+                    {% for driver in market_drivers %}
+                    <li>{{ driver }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
             {% if sections.markets and sections.markets|length > 0 %}
-            <div class="india-stories-grid">
+            <div class="india-stories-grid" style="margin-top: 10px;">
                 {% for story in sections.markets[:3] %}
                 <div class="editorial-story-card">
                     <div>
@@ -198,19 +273,19 @@
         </div>
 
         <footer class="page-footer">
-            <span>THE DAILY BRIEF • INDIA & MARKETS</span>
-            <span>PAGE 2 OF 8</span>
+            <span>THE DAILY BRIEF • FINANCIAL MARKETS</span>
+            <span>PAGE 3 OF 8</span>
         </footer>
     </div>
 
 
     <!-- ===================================================================
-         PAGE 3: PRECIOUS METALS & SECTOR WATCH
+         PAGE 4: PRECIOUS METALS & SECTOR WATCH
          =================================================================== -->
-    <div class="newspaper-page" id="page-3">
+    <div class="newspaper-page" id="page-4">
         <div class="page-content">
             <div class="page-header-strip">
-                <h2>04 | PRECIOUS METALS</h2>
+                <h2>05 | PRECIOUS METALS</h2>
                 <span class="header-meta">COMMODITIES DEEP DIVE</span>
             </div>
 
@@ -263,7 +338,7 @@
             </div>
 
             <div class="page-header-strip" style="margin-top: 8px;">
-                <h2>05 | SECTOR WATCH</h2>
+                <h2>06 | SECTOR WATCH</h2>
                 <span class="header-meta">INDUSTRY PERFORMANCE & DEVELOPMENTS</span>
             </div>
 
@@ -304,18 +379,18 @@
 
         <footer class="page-footer">
             <span>THE DAILY BRIEF • COMMODITIES & SECTORS</span>
-            <span>PAGE 3 OF 8</span>
+            <span>PAGE 4 OF 8</span>
         </footer>
     </div>
 
 
     <!-- ===================================================================
-         PAGE 4: COMPANIES & GLOBAL MACRO
+         PAGE 5: COMPANIES & WATCHLIST + GLOBAL ECONOMY
          =================================================================== -->
-    <div class="newspaper-page" id="page-4">
+    <div class="newspaper-page" id="page-5">
         <div class="page-content">
             <div class="page-header-strip">
-                <h2>06 | COMPANIES & WATCHLIST</h2>
+                <h2>07 | COMPANIES & WATCHLIST</h2>
                 <span class="header-meta">CORPORATE ACTIONS & HIGHLIGHTS</span>
             </div>
 
@@ -374,7 +449,7 @@
             </div>
 
             <div class="page-header-strip" style="margin-top: 10px;">
-                <h2>07 | GLOBAL ECONOMY</h2>
+                <h2>08 | GLOBAL ECONOMY</h2>
                 <span class="header-meta">INTERNATIONAL MACRO OVERVIEW</span>
             </div>
 
@@ -419,18 +494,18 @@
 
         <footer class="page-footer">
             <span>THE DAILY BRIEF • COMPANIES & GLOBAL MACRO</span>
-            <span>PAGE 4 OF 8</span>
+            <span>PAGE 5 OF 8</span>
         </footer>
     </div>
 
 
     <!-- ===================================================================
-         PAGE 5: AI & TECHNOLOGY
+         PAGE 6: AI & TECH + GITHUB FINDS
          =================================================================== -->
-    <div class="newspaper-page" id="page-5">
+    <div class="newspaper-page" id="page-6">
         <div class="page-content">
             <div class="page-header-strip">
-                <h2>08 | AI & TECHNOLOGY</h2>
+                <h2>09 | AI & TECHNOLOGY</h2>
                 <span class="header-meta">FRONTIER MODELS & ENTERPRISE TECH</span>
             </div>
 
@@ -449,45 +524,14 @@
             </div>
             {% endif %}
 
-            <div class="ai-sub-grid">
-                {% for story in tech_stories[1:3] %}
-                <div class="editorial-story-card">
-                    <div>
-                        <span class="section-label">AI ENTERPRISE & ARCHITECTURE</span>
-                        <h4>{{ story.headline }}</h4>
-                        <p>{{ story.summary }}</p>
-                    </div>
-                    <div class="story-footer-meta">
-                        <span>{{ story.sources[0] if story.sources else 'TECHCRUNCH' }}</span>
-                        {% if story.articles and story.articles[0].url %}
-                        <a href="{{ story.articles[0].url }}" target="_blank">READ →</a>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <footer class="page-footer">
-            <span>THE DAILY BRIEF • AI & TECHNOLOGY</span>
-            <span>PAGE 5 OF 8</span>
-        </footer>
-    </div>
-
-
-    <!-- ===================================================================
-         PAGE 6: GITHUB FINDS OF THE WEEK
-         =================================================================== -->
-    <div class="newspaper-page" id="page-6">
-        <div class="page-content">
-            <div class="page-header-strip">
-                <h2>09 | GITHUB FINDS OF THE WEEK</h2>
+            <div class="page-header-strip" style="margin-top: 8px;">
+                <h2>10 | GITHUB FINDS OF THE WEEK</h2>
                 <span class="header-meta">OPEN SOURCE & DEVELOPER TOOLS</span>
             </div>
 
             <div class="github-cards-list">
                 {% if github_repos %}
-                {% for repo in github_repos[:3] %}
+                {% for repo in github_repos[:2] %}
                 <div class="github-card">
                     <div class="github-card-header">
                         <span class="github-repo-title">⭐ #{{ loop.index }} {{ repo.name }}</span>
@@ -511,45 +555,27 @@
                 {% else %}
                 <div class="github-card">
                     <div class="github-card-header">
-                        <span class="github-repo-title">⭐ #1 finance-agent-framework</span>
+                        <span class="github-repo-title">⭐ #1 browser-use</span>
                         <div class="github-meta-pills">
-                            <span class="github-pill stars">⭐ 4.2k STARS</span>
+                            <span class="github-pill stars">⭐ 18,500 STARS</span>
                             <span class="github-pill">PYTHON</span>
-                            <span class="github-pill">AI / QUANT</span>
+                            <span class="github-pill">AI & AGENTS</span>
                         </div>
                     </div>
                     <div class="github-desc">
-                        <strong>WHAT IT DOES:</strong> Modular agentic execution engine for multi-asset market data analysis, financial news sentiment extraction, and automated backtesting.
+                        <strong>WHAT IT DOES:</strong> Make websites accessible for AI agents with automated browser control.
                     </div>
                     <div class="github-why-box">
-                        <strong>WHY IT'S INTERESTING:</strong> Decouples tool execution from LLM planning, supporting local Ollama models and cloud APIs with zero code changes.
+                        <strong>WHY IT'S INTERESTING:</strong> Enables LLM agents to interact seamlessly with dynamic web interfaces.
                     </div>
-                    <div><a href="https://github.com" class="github-link" target="_blank">VIEW REPOSITORY ON GITHUB →</a></div>
-                </div>
-
-                <div class="github-card">
-                    <div class="github-card-header">
-                        <span class="github-repo-title">⭐ #2 open-market-analytics</span>
-                        <div class="github-meta-pills">
-                            <span class="github-pill stars">⭐ 2.8k STARS</span>
-                            <span class="github-pill">TYPESCRIPT</span>
-                            <span class="github-pill">MARKETS</span>
-                        </div>
-                    </div>
-                    <div class="github-desc">
-                        <strong>WHAT IT DOES:</strong> High-frequency order book visualization and technical indicator computation pipeline using WebAssembly for browser performance.
-                    </div>
-                    <div class="github-why-box">
-                        <strong>WHY IT'S INTERESTING:</strong> Renders 100k data points per second with zero lag using WebGL hardware acceleration.
-                    </div>
-                    <div><a href="https://github.com" class="github-link" target="_blank">VIEW REPOSITORY ON GITHUB →</a></div>
+                    <div><a href="https://github.com/browser-use/browser-use" class="github-link" target="_blank">VIEW REPOSITORY ON GITHUB →</a></div>
                 </div>
                 {% endif %}
             </div>
         </div>
 
         <footer class="page-footer">
-            <span>THE DAILY BRIEF • GITHUB FINDS</span>
+            <span>THE DAILY BRIEF • AI & GITHUB FINDS</span>
             <span>PAGE 6 OF 8</span>
         </footer>
     </div>
@@ -561,7 +587,7 @@
     <div class="newspaper-page" id="page-7">
         <div class="page-content">
             <div class="page-header-strip">
-                <h2>10 | CONNECT THE DOTS</h2>
+                <h2>11 | CONNECT THE DOTS</h2>
                 <span class="header-meta">MACRO CAUSAL FLOWCHARTS</span>
             </div>
 
@@ -599,7 +625,7 @@
             </div>
 
             <div class="page-header-strip" style="margin-top: 8px;">
-                <h2>11 | WHAT TO WATCH</h2>
+                <h2>12 | WHAT TO WATCH</h2>
                 <span class="header-meta">MARKET CALENDAR & CATALYSTS</span>
             </div>
 
@@ -652,16 +678,16 @@
             <div class="concept-magazine-feature">
                 <div>
                     <div class="concept-badge-strip">
-                        <span>12 | FINANCE CONCEPT OF THE DAY</span>
+                        <span>13 | FINANCE CONCEPT OF THE DAY</span>
                     </div>
 
                     <h2 class="concept-main-title">
-                        {{ finance_concept.concept if (finance_concept and finance_concept.concept) else 'DURATION & CONVEXITY' }}
+                        {{ finance_concept.concept if (finance_concept and finance_concept.concept) else 'PRICE-TO-EARNINGS RATIO (P/E)' }}
                     </h2>
 
                     <div class="concept-section-title">THE CORE IDEA</div>
                     <p class="concept-core-text">
-                        {{ finance_concept.explanation if (finance_concept and finance_concept.explanation) else 'Duration measures a bond price sensitivity to interest rate fluctuations. Macaulay duration calculates the weighted average time until expected cash flows are received, while Modified Duration quantifies the exact percentage price change resulting from a 100 basis point shift in yields.' }}
+                        {{ finance_concept.explanation if (finance_concept and finance_concept.explanation) else 'P/E compares a stock price to its annual per-share earnings, reflecting market expectations of future growth.' }}
                     </p>
 
                     <!-- Formula & Relationship Flow -->
@@ -696,7 +722,7 @@
                         {% if finance_concept and finance_concept.numerical_example %}
                         <strong>MATHEMATICAL DEMONSTRATION:</strong> {{ finance_concept.numerical_example }}
                         {% else %}
-                        <strong>MATHEMATICAL DEMONSTRATION:</strong> A 10-year Treasury bond with a Modified Duration of 7.2 years priced at \$1,000 will experience an approximate price decline of 7.2% (-\$72.00) to \$928.00 if benchmark interest rates rise by 100 basis points (1.00%).
+                        <strong>MATHEMATICAL DEMONSTRATION:</strong> If a stock trades at ₹500 with EPS of ₹25, its P/E ratio is 20x.
                         {% endif %}
                     </div>
 
@@ -718,14 +744,14 @@
 
                     <div class="concept-section-title">REAL-WORLD MARKET CONNECTION</div>
                     <p class="concept-relevance-text">
-                        {{ finance_concept.why_relevant_today if (finance_concept and finance_concept.why_relevant_today) else 'In todays volatile yield environment, institutional portfolio managers actively adjust portfolio duration to hedge against central bank interest rate decisions and yield curve shifts.' }}
+                        {{ finance_concept.why_relevant_today if (finance_concept and finance_concept.why_relevant_today) else 'Today\'s financial developments illustrate how this fundamental concept affects market asset valuations.' }}
                     </p>
                 </div>
 
                 <div class="concept-cfa-box">
                     <div class="concept-cfa-title">🎓 CFA & PORTFOLIO MANAGER TAKEAWAY</div>
                     <div class="concept-cfa-text">
-                        {{ finance_concept.cfa_takeaway if (finance_concept and finance_concept.cfa_takeaway) else 'Remember that duration is a linear approximation of bond price change. For larger yield movements, Convexity must be added to account for the curvature of the price-yield relationship.' }}
+                        Remember that valuation multiples must be interpreted in context with industry growth rates, capital structure, and macroeconomic interest rates.
                     </div>
                 </div>
             </div>

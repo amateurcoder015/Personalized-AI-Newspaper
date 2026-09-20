@@ -1,5 +1,5 @@
 /* ==========================================================================
-   THE DAILY BRIEF — EDITORIAL NEWSPAPER & PDF DESIGN SYSTEM
+   THE DAILY BRIEF — EDITORIAL NEWSPAPER & PDF DESIGN SYSTEM (MILESTONES 7 & 8)
    Palette:
    - Primary Near-Black: #111318
    - Warm Paper Off-White: #F5F3EE
@@ -151,7 +151,7 @@ body {
     margin-top: 6px;
 }
 
-/* Page Section Headers (Pages 2-8) */
+/* Page Section Headers */
 .page-header-strip {
     display: flex;
     justify-content: space-between;
@@ -190,17 +190,99 @@ body {
     margin-bottom: 6px;
 }
 
-.section-label.red {
-    background: var(--accent-red);
+.section-label.red { background: var(--accent-red); }
+.section-label.gold { background: var(--accent-gold); color: var(--bg-dark); }
+
+/* Badges & Indicators */
+.evidence-badge {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 2px;
+    margin-left: 6px;
 }
 
-.section-label.gold {
-    background: var(--accent-gold);
-    color: var(--bg-dark);
+.evidence-badge.high { background: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; }
+.evidence-badge.medium { background: #FEF9C3; color: #A16207; border: 1px solid #FEF08A; }
+.evidence-badge.developing { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+
+.primary-source-badge {
+    background: #E0F2FE;
+    color: #0369A1;
+    font-size: 0.6rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border: 1px solid #BAE6FD;
 }
 
 /* ==========================================================================
-   PAGE 1: COVER & HERO LAYOUT
+   WHAT CHANGED SINCE YESTERDAY (SECTION 02)
+   ========================================================================== */
+
+.what-changed-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--bg-dark);
+    border-left: 4px solid var(--accent-red);
+    padding: 12px 14px;
+    margin-bottom: 12px;
+}
+
+.what-changed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-card);
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+}
+
+.what-changed-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 900;
+    color: var(--bg-dark);
+}
+
+.what-changed-list {
+    list-style: none;
+    font-size: 0.76rem;
+}
+
+.what-changed-list li {
+    padding: 4px 0;
+    border-bottom: 1px dashed #E2DEC9;
+    color: var(--text-main);
+    line-height: 1.4;
+}
+
+.what-changed-list li:last-child { border-bottom: none; }
+
+/* Why Markets Moved Card */
+.why-markets-moved-box {
+    background: #F4EFDE;
+    border: 1px solid #E2DEC9;
+    border-left: 3px solid var(--secondary-navy);
+    padding: 10px;
+    margin-top: 8px;
+    font-size: 0.74rem;
+}
+
+.why-markets-moved-title {
+    font-weight: 800;
+    font-size: 0.7rem;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--secondary-navy);
+    margin-bottom: 4px;
+}
+
+/* ==========================================================================
+   COVER & HERO LAYOUT (PAGE 1)
    ========================================================================== */
 
 .cover-split-grid {
@@ -264,6 +346,7 @@ body {
 .story-footer-meta {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: 0.68rem;
     color: var(--text-muted);
     font-weight: 600;
@@ -278,7 +361,7 @@ body {
     font-weight: 700;
 }
 
-/* Executive Market Snapshot Widget (Page 1 Right) */
+/* Market Widget */
 .market-widget-dark {
     background: var(--bg-dark);
     color: #FFFFFF;
@@ -328,32 +411,14 @@ body {
     font-size: 0.75rem;
 }
 
-.mini-ticker-name {
-    font-weight: 700;
-    color: #E2E8F0;
-    width: 35%;
-}
-
-.mini-ticker-val {
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: #FFFFFF;
-}
-
-.mini-ticker-change {
-    font-weight: 700;
-    font-size: 0.7rem;
-}
-
+.mini-ticker-name { font-weight: 700; color: #E2E8F0; width: 35%; }
+.mini-ticker-val { font-weight: 700; font-variant-numeric: tabular-nums; color: #FFFFFF; }
+.mini-ticker-change { font-weight: 700; font-size: 0.7rem; }
 .mini-ticker-change.pos { color: #4ADE80; }
 .mini-ticker-change.neg { color: #F87171; }
 
-.mini-sparkline {
-    width: 45px;
-    height: 14px;
-}
+.mini-sparkline { width: 45px; height: 14px; }
 
-/* Secondary Top Stories Grid (Page 1 Bottom) */
 .secondary-stories-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -395,7 +460,7 @@ body {
 }
 
 /* ==========================================================================
-   MARKET SECTION & CARDS (PAGE 2)
+   MARKET SECTION & CARDS
    ========================================================================== */
 
 .section-block-title {
@@ -432,31 +497,13 @@ body {
     margin-bottom: 4px;
 }
 
-.market-card-name {
-    font-size: 0.72rem;
-    font-weight: 800;
-    color: var(--bg-dark);
-}
-
-.market-card-val {
-    font-size: 0.92rem;
-    font-weight: 800;
-    color: var(--bg-dark);
-    font-variant-numeric: tabular-nums;
-}
-
-.market-card-change {
-    font-size: 0.72rem;
-    font-weight: 700;
-}
+.market-card-name { font-size: 0.72rem; font-weight: 800; color: var(--bg-dark); }
+.market-card-val { font-size: 0.92rem; font-weight: 800; color: var(--bg-dark); font-variant-numeric: tabular-nums; }
+.market-card-change { font-size: 0.72rem; font-weight: 700; }
 .market-card-change.pos { color: var(--positive-green); }
 .market-card-change.neg { color: var(--negative-red); }
 
-.market-sparkline-box {
-    margin: 4px 0;
-    height: 22px;
-    width: 100%;
-}
+.market-sparkline-box { margin: 4px 0; height: 22px; width: 100%; }
 
 .market-card-range {
     display: flex;
@@ -467,7 +514,6 @@ body {
     padding-top: 2px;
 }
 
-/* India Stories Grid (Page 2) */
 .india-stories-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -500,10 +546,7 @@ body {
     margin-bottom: 8px;
 }
 
-/* ==========================================================================
-   PAGE 3: COMMODITIES & SECTORS
-   ========================================================================== */
-
+/* Precious Metals */
 .precious-metals-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -528,32 +571,13 @@ body {
     margin-bottom: 4px;
 }
 
-.metal-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: var(--bg-dark);
-}
-
-.metal-price-tag {
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: var(--bg-dark);
-    font-variant-numeric: tabular-nums;
-}
-
-.metal-change-tag {
-    font-size: 0.76rem;
-    font-weight: 700;
-}
+.metal-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 800; color: var(--bg-dark); }
+.metal-price-tag { font-size: 1.15rem; font-weight: 800; color: var(--bg-dark); font-variant-numeric: tabular-nums; }
+.metal-change-tag { font-size: 0.76rem; font-weight: 700; }
 .metal-change-tag.pos { color: var(--positive-green); }
 .metal-change-tag.neg { color: var(--negative-red); }
 
-.metal-chart-container {
-    height: 35px;
-    width: 100%;
-    margin: 6px 0;
-}
+.metal-chart-container { height: 35px; width: 100%; margin: 6px 0; }
 
 .metal-driver-text {
     background: #F4EFDE;
@@ -564,7 +588,7 @@ body {
     line-height: 1.35;
 }
 
-/* Sector Pulse Grid */
+/* Sector Pulse */
 .sector-pulse-bar {
     background: var(--bg-dark);
     color: #FFFFFF;
@@ -575,455 +599,81 @@ body {
     margin-bottom: 10px;
 }
 
-.sector-pulse-title {
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 1px;
-    color: var(--accent-gold);
-    text-transform: uppercase;
-}
-
-.sector-pulse-items {
-    display: flex;
-    gap: 12px;
-    font-size: 0.72rem;
-    font-weight: 700;
-}
-
+.sector-pulse-title { font-size: 0.68rem; font-weight: 800; letter-spacing: 1px; color: var(--accent-gold); text-transform: uppercase; }
+.sector-pulse-items { display: flex; gap: 12px; font-size: 0.72rem; font-weight: 700; }
 .sector-pulse-item.pos { color: #4ADE80; }
 .sector-pulse-item.neg { color: #F87171; }
 
-.sector-stories-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-}
+.sector-stories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 
-.sector-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-card);
-    padding: 10px;
-}
+.sector-card { background: var(--card-bg); border: 1px solid var(--border-card); padding: 10px; }
+.sector-card-header { border-bottom: 1.5px solid var(--bg-dark); padding-bottom: 3px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+.sector-card-name { font-size: 0.74rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--bg-dark); }
+.sector-card-news { font-size: 0.72rem; color: var(--text-main); line-height: 1.35; }
 
-.sector-card-header {
-    border-bottom: 1.5px solid var(--bg-dark);
-    padding-bottom: 3px;
-    margin-bottom: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+/* Corporate Watchlist Table */
+.watchlist-table-container { margin-bottom: 10px; }
+.watchlist-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; background: var(--card-bg); border: 1px solid var(--border-card); }
+.watchlist-table th { background: var(--secondary-navy); color: #FFFFFF; text-transform: uppercase; font-size: 0.64rem; letter-spacing: 0.8px; padding: 5px 8px; text-align: left; }
+.watchlist-table td { padding: 5px 8px; border-bottom: 1px solid #ECE8DE; }
 
-.sector-card-name {
-    font-size: 0.74rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--bg-dark);
-}
+.macro-region-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+.macro-card { background: var(--card-bg); border: 1px solid var(--border-card); padding: 8px; }
+.macro-card-header { background: var(--bg-dark); color: #FFFFFF; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; padding: 3px 6px; margin-bottom: 6px; letter-spacing: 0.8px; }
+.macro-metric-list { font-size: 0.7rem; line-height: 1.4; color: var(--text-main); }
 
-.sector-card-news {
-    font-size: 0.72rem;
-    color: var(--text-main);
-    line-height: 1.35;
-}
+/* AI Section */
+.ai-hero-card { background: #F4F6F9; border: 1px solid var(--border-card); border-left: 4px solid var(--secondary-navy); padding: 12px; margin-bottom: 10px; }
+.ai-hero-card h3 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.25rem; font-weight: 800; color: var(--bg-dark); margin-bottom: 6px; }
+.ai-hero-card p { font-size: 0.78rem; color: var(--text-main); line-height: 1.4; margin-bottom: 8px; }
+.ai-sub-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 
-/* ==========================================================================
-   PAGE 4: COMPANIES & GLOBAL MACRO
-   ========================================================================== */
+/* GitHub Finds */
+.github-cards-list { display: flex; flex-direction: column; gap: 10px; }
+.github-card { background: var(--card-bg); border: 1px solid var(--border-card); padding: 12px; }
+.github-card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ECE8DE; padding-bottom: 4px; margin-bottom: 6px; }
+.github-repo-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 800; color: var(--bg-dark); }
+.github-meta-pills { display: flex; gap: 6px; }
+.github-pill { background: #EAE6DF; color: var(--bg-dark); font-size: 0.64rem; font-weight: 700; padding: 2px 6px; border-radius: 2px; }
+.github-pill.stars { background: #FEF08A; color: #854D0E; }
+.github-desc { font-size: 0.75rem; color: var(--text-main); margin-bottom: 6px; line-height: 1.4; }
+.github-why-box { background: #F4EFDE; border-left: 3px solid var(--accent-gold); padding: 6px 8px; font-size: 0.72rem; color: var(--bg-dark); margin-bottom: 6px; }
+.github-link { font-size: 0.7rem; font-weight: 700; color: var(--accent-red); text-decoration: none; }
 
-.watchlist-table-container {
-    margin-bottom: 10px;
-}
+/* Connect the Dots */
+.causal-diagram-box { background: var(--card-bg); border: 1px solid var(--border-card); padding: 12px; margin-bottom: 12px; }
+.causal-diagram-title { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 800; color: var(--bg-dark); margin-bottom: 8px; }
+.causal-flow-row { display: flex; align-items: center; justify-content: space-between; background: #F4EFDE; border: 1px solid #E2DEC9; padding: 8px 10px; margin-bottom: 8px; }
+.flow-node { background: var(--bg-dark); color: #FFFFFF; font-size: 0.68rem; font-weight: 700; padding: 4px 8px; text-align: center; border-radius: 2px; }
+.flow-arrow { font-size: 1rem; font-weight: 900; color: var(--accent-red); }
+.causal-why-text { font-size: 0.73rem; color: var(--text-main); line-height: 1.35; }
 
-.watchlist-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.72rem;
-    background: var(--card-bg);
-    border: 1px solid var(--border-card);
-}
+/* Timeline Component */
+.timeline-split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.timeline-card { background: var(--card-bg); border: 1px solid var(--border-card); padding: 10px; }
+.timeline-card-header { background: var(--bg-dark); color: #FFFFFF; font-size: 0.68rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; padding: 4px 8px; margin-bottom: 8px; }
+.timeline-item-list { list-style: none; font-size: 0.72rem; }
+.timeline-item-list li { padding: 4px 0; border-bottom: 1px solid #ECE8DE; display: flex; gap: 6px; }
+.timeline-time { font-weight: 800; color: var(--accent-red); min-width: 42px; }
 
-.watchlist-table th {
-    background: var(--secondary-navy);
-    color: #FFFFFF;
-    text-transform: uppercase;
-    font-size: 0.64rem;
-    letter-spacing: 0.8px;
-    padding: 5px 8px;
-    text-align: left;
-}
+/* Finance Concept */
+.concept-magazine-feature { background: #FFFDF9; border: 2px solid var(--bg-dark); padding: 16px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+.concept-badge-strip { text-align: center; border-bottom: 2px solid var(--bg-dark); padding-bottom: 6px; margin-bottom: 10px; }
+.concept-badge-strip span { background: var(--accent-red); color: #FFFFFF; font-size: 0.68rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 10px; }
+.concept-main-title { font-family: 'Playfair Display', Georgia, serif; font-size: 1.8rem; font-weight: 900; color: var(--bg-dark); text-transform: uppercase; text-align: center; line-height: 1.1; margin-bottom: 12px; }
+.concept-section-title { font-size: 0.72rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--accent-red); border-bottom: 1px solid var(--bg-dark); padding-bottom: 2px; margin: 8px 0 4px 0; }
+.concept-core-text { font-size: 0.8rem; color: var(--text-main); line-height: 1.45; margin-bottom: 10px; }
+.concept-diagram-box { background: var(--bg-dark); color: #FFFFFF; padding: 12px; margin: 10px 0; text-align: center; }
+.concept-relationship-flow { display: flex; justify-content: space-around; align-items: center; font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; color: #FFFFFF; margin-bottom: 8px; }
+.concept-formula-box { display: flex; justify-content: center; gap: 16px; font-size: 0.75rem; font-weight: 700; color: var(--accent-gold); }
+.concept-formula-item { border: 1px solid #333A48; padding: 4px 10px; background: #191E28; }
+.concept-math-box { background: #EAE6DF; border: 1px solid #D8D5CC; padding: 8px 12px; font-size: 0.75rem; color: var(--bg-dark); margin-bottom: 8px; }
+.concept-relevance-text { font-size: 0.78rem; color: var(--text-main); line-height: 1.4; margin-bottom: 8px; }
+.concept-cfa-box { background: #FFFDF5; border: 2px solid var(--accent-gold); padding: 10px; }
+.concept-cfa-title { font-size: 0.7rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #854D0E; margin-bottom: 3px; }
+.concept-cfa-text { font-size: 0.75rem; color: #713F12; line-height: 1.4; }
 
-.watchlist-table td {
-    padding: 5px 8px;
-    border-bottom: 1px solid #ECE8DE;
-}
-
-.macro-region-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    margin-bottom: 10px;
-}
-
-.macro-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-card);
-    padding: 8px;
-}
-
-.macro-card-header {
-    background: var(--bg-dark);
-    color: #FFFFFF;
-    font-size: 0.68rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    padding: 3px 6px;
-    margin-bottom: 6px;
-    letter-spacing: 0.8px;
-}
-
-.macro-metric-list {
-    font-size: 0.7rem;
-    line-height: 1.4;
-    color: var(--text-main);
-}
-
-/* ==========================================================================
-   PAGE 5: AI & TECHNOLOGY
-   ========================================================================== */
-
-.ai-hero-card {
-    background: #F4F6F9;
-    border: 1px solid var(--border-card);
-    border-left: 4px solid var(--secondary-navy);
-    padding: 12px;
-    margin-bottom: 10px;
-}
-
-.ai-hero-card h3 {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: var(--bg-dark);
-    margin-bottom: 6px;
-}
-
-.ai-hero-card p {
-    font-size: 0.78rem;
-    color: var(--text-main);
-    line-height: 1.4;
-    margin-bottom: 8px;
-}
-
-.ai-sub-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-}
-
-/* ==========================================================================
-   PAGE 6: GITHUB FINDS
-   ========================================================================== */
-
-.github-cards-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.github-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-card);
-    padding: 12px;
-}
-
-.github-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #ECE8DE;
-    padding-bottom: 4px;
-    margin-bottom: 6px;
-}
-
-.github-repo-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.05rem;
-    font-weight: 800;
-    color: var(--bg-dark);
-}
-
-.github-meta-pills {
-    display: flex;
-    gap: 6px;
-}
-
-.github-pill {
-    background: #EAE6DF;
-    color: var(--bg-dark);
-    font-size: 0.64rem;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 2px;
-}
-
-.github-pill.stars {
-    background: #FEF08A;
-    color: #854D0E;
-}
-
-.github-desc {
-    font-size: 0.75rem;
-    color: var(--text-main);
-    margin-bottom: 6px;
-    line-height: 1.4;
-}
-
-.github-why-box {
-    background: #F4EFDE;
-    border-left: 3px solid var(--accent-gold);
-    padding: 6px 8px;
-    font-size: 0.72rem;
-    color: var(--bg-dark);
-    margin-bottom: 6px;
-}
-
-.github-link {
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--accent-red);
-    text-decoration: none;
-}
-
-/* ==========================================================================
-   PAGE 7: CONNECT THE DOTS & WHAT TO WATCH
-   ========================================================================== */
-
-.causal-diagram-box {
-    background: var(--card-bg);
-    border: 1px solid var(--border-card);
-    padding: 12px;
-    margin-bottom: 12px;
-}
-
-.causal-diagram-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 0.95rem;
-    font-weight: 800;
-    color: var(--bg-dark);
-    margin-bottom: 8px;
-}
-
-.causal-flow-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #F4EFDE;
-    border: 1px solid #E2DEC9;
-    padding: 8px 10px;
-    margin-bottom: 8px;
-}
-
-.flow-node {
-    background: var(--bg-dark);
-    color: #FFFFFF;
-    font-size: 0.68rem;
-    font-weight: 700;
-    padding: 4px 8px;
-    text-align: center;
-    border-radius: 2px;
-}
-
-.flow-arrow {
-    font-size: 1rem;
-    font-weight: 900;
-    color: var(--accent-red);
-}
-
-.causal-why-text {
-    font-size: 0.73rem;
-    color: var(--text-main);
-    line-height: 1.35;
-}
-
-/* Timeline Component (What to Watch) */
-.timeline-split-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-.timeline-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-card);
-    padding: 10px;
-}
-
-.timeline-card-header {
-    background: var(--bg-dark);
-    color: #FFFFFF;
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 4px 8px;
-    margin-bottom: 8px;
-}
-
-.timeline-item-list {
-    list-style: none;
-    font-size: 0.72rem;
-}
-
-.timeline-item-list li {
-    padding: 4px 0;
-    border-bottom: 1px solid #ECE8DE;
-    display: flex;
-    gap: 6px;
-}
-
-.timeline-time {
-    font-weight: 800;
-    color: var(--accent-red);
-    min-width: 42px;
-}
-
-/* ==========================================================================
-   PAGE 8: FINANCE CONCEPT OF THE DAY (MAGAZINE CLIMAX)
-   ========================================================================== */
-
-.concept-magazine-feature {
-    background: #FFFDF9;
-    border: 2px solid var(--bg-dark);
-    padding: 16px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.concept-badge-strip {
-    text-align: center;
-    border-bottom: 2px solid var(--bg-dark);
-    padding-bottom: 6px;
-    margin-bottom: 10px;
-}
-
-.concept-badge-strip span {
-    background: var(--accent-red);
-    color: #FFFFFF;
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 3px 10px;
-}
-
-.concept-main-title {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 1.8rem;
-    font-weight: 900;
-    color: var(--bg-dark);
-    text-transform: uppercase;
-    text-align: center;
-    line-height: 1.1;
-    margin-bottom: 12px;
-}
-
-.concept-section-title {
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--accent-red);
-    border-bottom: 1px solid var(--bg-dark);
-    padding-bottom: 2px;
-    margin: 8px 0 4px 0;
-}
-
-.concept-core-text {
-    font-size: 0.8rem;
-    color: var(--text-main);
-    line-height: 1.45;
-    margin-bottom: 10px;
-}
-
-.concept-diagram-box {
-    background: var(--bg-dark);
-    color: #FFFFFF;
-    padding: 12px;
-    margin: 10px 0;
-    text-align: center;
-}
-
-.concept-relationship-flow {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    font-family: 'Playfair Display', serif;
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #FFFFFF;
-    margin-bottom: 8px;
-}
-
-.concept-formula-box {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--accent-gold);
-}
-
-.concept-formula-item {
-    border: 1px solid #333A48;
-    padding: 4px 10px;
-    background: #191E28;
-}
-
-.concept-math-box {
-    background: #EAE6DF;
-    border: 1px solid #D8D5CC;
-    padding: 8px 12px;
-    font-size: 0.75rem;
-    color: var(--bg-dark);
-    margin-bottom: 8px;
-}
-
-.concept-relevance-text {
-    font-size: 0.78rem;
-    color: var(--text-main);
-    line-height: 1.4;
-    margin-bottom: 8px;
-}
-
-.concept-cfa-box {
-    background: #FFFDF5;
-    border: 2px solid var(--accent-gold);
-    padding: 10px;
-}
-
-.concept-cfa-title {
-    font-size: 0.7rem;
-    font-weight: 800;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: #854D0E;
-    margin-bottom: 3px;
-}
-
-.concept-cfa-text {
-    font-size: 0.75rem;
-    color: #713F12;
-    line-height: 1.4;
-}
-
-/* ==========================================================================
-   RUNNING FOOTER (ALL PAGES)
-   ========================================================================== */
-
+/* Running Footer */
 .page-footer {
     border-top: 1px solid var(--bg-dark);
     padding-top: 4px;

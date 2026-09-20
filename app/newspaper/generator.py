@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 class NewspaperGenerator:
-    """Renders 12-section HTML executive daily newspaper using Jinja2 templates."""
+    """Renders 14-section HTML executive daily newspaper using Jinja2 templates."""
 
     def __init__(self, template_dir: Optional[str] = None, output_dir: str = "data/editions"):
         if template_dir is None:
@@ -36,6 +36,11 @@ class NewspaperGenerator:
         causal_connections: List[CausalConnection],
         calendar_items: Dict[str, List[str]],
         finance_concept: Dict[str, Any],
+        what_changed: Optional[List[str]] = None,
+        market_drivers: Optional[List[str]] = None,
+        watchlist_changes: Optional[Dict[str, List[str]]] = None,
+        source_health: Optional[Dict[str, str]] = None,
+        run_log: Optional[Dict[str, Any]] = None,
         user_name: str = "Tony Stark"
     ) -> Tuple[str, Edition]:
         """Render newspaper HTML and save to editions directory."""
@@ -66,6 +71,11 @@ class NewspaperGenerator:
             causal_connections=causal_connections,
             calendar_items=calendar_items,
             finance_concept=finance_concept,
+            what_changed=what_changed or [],
+            market_drivers=market_drivers or [],
+            watchlist_changes=watchlist_changes or {},
+            source_health=source_health or {},
+            run_log=run_log or {},
             css_styles=css_styles
         )
 
@@ -79,8 +89,11 @@ class NewspaperGenerator:
             date=date_str,
             html_path=str(out_file.resolve()),
             status="generated",
-            stories_count=total_stories
+            stories_count=total_stories,
+            what_changed=what_changed or [],
+            source_health=source_health or {},
+            run_log=run_log or {}
         )
 
-        logger.info(f"12-Section Newspaper rendered successfully: {out_file.resolve()} ({total_stories} stories)")
+        logger.info(f"14-Section Newspaper rendered successfully: {out_file.resolve()} ({total_stories} stories)")
         return html_out, edition
