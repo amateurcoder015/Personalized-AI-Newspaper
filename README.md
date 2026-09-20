@@ -4,6 +4,21 @@ An automated, AI-powered daily executive newspaper that ingests RSS news feeds, 
 
 ---
 
+## 📰 Today's Edition Preview — 20 September 2026
+
+The generated PDF edition features a 14-section modern executive publication design rendered dynamically:
+
+| Page 1: Cover & Market Snapshot | Page 2: What Changed & India | Page 3: Financial Markets | Page 4: Precious Metals & Sectors |
+| :---: | :---: | :---: | :---: |
+| ![Page 1](docs/images/pdf_page_1.png) | ![Page 2](docs/images/pdf_page_2.png) | ![Page 3](docs/images/pdf_page_3.png) | ![Page 4](docs/images/pdf_page_4.png) |
+
+| Page 5: Companies & Watchlist | Page 6: AI & Tech / GitHub Finds | Page 7: Connect The Dots | Page 8: Finance Concept of the Day |
+| :---: | :---: | :---: | :---: |
+| ![Page 5](docs/images/pdf_page_5.png) | ![Page 6](docs/images/pdf_page_6.png) | ![Page 7](docs/images/pdf_page_7.png) | ![Page 8](docs/images/pdf_page_8.png) |
+
+---
+
+
 ## Key Features
 
 - **Automated Collection**: RSS feed collection from business, technology, economy, and global finance feeds.
