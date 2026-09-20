@@ -57,6 +57,7 @@ class LLMEditor:
                 res = self.provider.generate_structured(prompt, system_prompt=SYSTEM_EDITORIAL_PROMPT)
 
                 if res:
+                    story.llm_status = "llm_generated"
                     story.headline = res.get("headline", story.headline)
                     story.summary = res.get("summary", story.summary)
                     story.why_it_matters = res.get("why_it_matters", "")
@@ -79,6 +80,7 @@ class LLMEditor:
                 res = self.provider.generate_structured(prompt, system_prompt=SYSTEM_EDITORIAL_PROMPT)
 
                 if res:
+                    story.llm_status = "llm_generated"
                     story.summary = res.get("summary", title)
                     story.why_it_matters = res.get("why_it_matters", "")
                 else:
@@ -92,6 +94,7 @@ class LLMEditor:
 
     def _apply_factual_fallback(self, story: Story) -> None:
         """Apply strictly factual source headline and description without inventing AI text."""
+        story.llm_status = "failed"
         if story.articles:
             primary = story.articles[0]
             if primary.description:

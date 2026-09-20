@@ -45,6 +45,7 @@ class Story(BaseModel):
     matched_watchlist: List[str] = Field(default_factory=list)
     evidence_level: str = "HIGH CONFIDENCE"  # HIGH CONFIDENCE, MEDIUM CONFIDENCE, DEVELOPING
     is_primary_source: bool = False
+    llm_status: str = "pending"  # llm_generated, cached, failed
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     def model_post_init(self, __context):

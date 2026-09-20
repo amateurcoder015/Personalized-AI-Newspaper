@@ -104,38 +104,107 @@ class FreeLLMAPIProvider(LLMProvider):
             return {}
 
     def health_check(self) -> Dict[str, Any]:
-        """Perform real LLM health check measuring latency, connectivity, completion, and JSON parsing."""
+        """Perform comprehensive step-by-step LLM endpoint health check per specifications."""
         start_time = time.time()
-        result = {
+        res_data = {
             "provider": "FreeLLMAPI",
-            "endpoint": self.base_url,
+            "base_url": self.base_url,
             "model": self.model,
-            "connection": "FAILED",
-            "completion": "FAILED",
+            "server_reachable": "NO",
+            "models_endpoint": "NO",
+            "chat_endpoint": "NO",
+            "authentication": "FAILED",
+            "simple_completion": "FAILED",
             "structured_json": "FAILED",
             "latency": 0.0,
+            "available_models": [],
             "error": None
         }
 
-        # Step 1: Connectivity & Basic Completion
-        res = self._call_api([{"role": "user", "content": "Say 'LLM_HEALTH_OK'"}])
-        latency = round(time.time() - start_time, 2)
-        result["latency"] = latency
+        # 1. Check server reachability (GET base host)
+        root_url = self.base_url.rsplit("/v1", 1)[0] or self.base_url
+        target_root = root_url if root_url.startswith("http") else f"http://{root_url}"
+        try:
+            r_root = requests.get(target_root, timeout=3)
+            res_data["server_reachable"] = f"YES (HTTP {r_root.status_code})"
+        except Exception as e:
+            res_data["server_reachable"] = "NO"
+            res_data["error"] = f"Connection refused at {target_root} ({e})"
 
-        if res is not None:
-            result["connection"] = "OK"
-            result["completion"] = "OK"
-
-            # Step 2: Test Structured JSON
-            json_res = self.generate_structured("Return JSON: {\"status\": \"ok\"}")
-            if json_res and json_res.get("status") == "ok":
-                result["structured_json"] = "OK"
+        # 2. Check /v1/models endpoint
+        models_url = f"{self.base_url}/models"
+        headers = {"Authorization": f"Bearer {self.api_key}"}
+        try:
+            r_models = requests.get(models_url, headers=headers, timeout=4)
+            if r_models.status_code == 200:
+                res_data["models_endpoint"] = "YES (200 OK)"
+                try:
+                    m_json = r_models.json()
+                    model_list = [m.get("id") for m in m_json.get("data", []) if isinstance(m, dict)]
+                    res_data["available_models"] = model_list
+                except Exception:
+                    res_data["available_models"] = []
             else:
-                result["structured_json"] = "FAILED (JSON parse failure)"
-        else:
-            result["error"] = self.last_error or "Connection refused / Endpoint unreachable"
+                res_data["models_endpoint"] = f"FAILED (HTTP {r_models.status_code})"
+        except Exception as e:
+            res_data["models_endpoint"] = f"FAILED ({e})"
 
-        return result
+        # 3. Check Chat endpoint / simple completion & authentication (STEP 5 test prompt)
+        completion_prompt = (
+            'Return valid JSON with:\n'
+            '{\n'
+            '  "test": true,\n'
+            '  "message": "LLM connection successful"\n'
+            '}'
+        )
+        url = f"{self.base_url}/chat/completions"
+        payload = {
+            "model": self.model,
+            "messages": [{"role": "user", "content": completion_prompt}],
+            "temperature": 0.2
+        }
+
+        try:
+            r_chat = requests.post(
+                url,
+                headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"},
+                json=payload,
+                timeout=6
+            )
+            latency = round(time.time() - start_time, 2)
+            res_data["latency"] = latency
+
+            if r_chat.status_code == 200:
+                res_data["chat_endpoint"] = "YES (200 OK)"
+                res_data["authentication"] = "OK"
+                res_data["simple_completion"] = "OK"
+
+                # Test structured JSON parsing
+                content = r_chat.json()["choices"][0]["message"]["content"]
+                try:
+                    parsed = json.loads(content)
+                    if isinstance(parsed, dict) and parsed.get("test") is True:
+                        res_data["structured_json"] = "OK"
+                    else:
+                        res_data["structured_json"] = "FAILED (JSON key mismatch)"
+                except Exception:
+                    res_data["structured_json"] = "FAILED (JSON syntax error)"
+
+            elif r_chat.status_code in [401, 403]:
+                res_data["chat_endpoint"] = f"FAILED (HTTP {r_chat.status_code})"
+                res_data["authentication"] = "FAILED (Invalid API key)"
+                res_data["error"] = f"Authentication error HTTP {r_chat.status_code}: {r_chat.text[:150]}"
+            else:
+                res_data["chat_endpoint"] = f"FAILED (HTTP {r_chat.status_code})"
+                res_data["error"] = f"HTTP {r_chat.status_code}: {r_chat.text[:150]}"
+
+        except Exception as e:
+            res_data["latency"] = round(time.time() - start_time, 2)
+            res_data["chat_endpoint"] = f"FAILED ({e})"
+            if not res_data["error"]:
+                res_data["error"] = str(e)
+
+        return res_data
 
     def get_formatted_health_report(self) -> str:
         h = self.health_check()
@@ -143,17 +212,37 @@ class FreeLLMAPIProvider(LLMProvider):
             "============================================================",
             "LLM HEALTH CHECK",
             "============================================================",
-            f"Provider        : {h['provider']}",
-            f"Endpoint        : {h['endpoint']}",
-            f"Model           : {h['model']}",
+            f"Provider           : {h['provider']}",
+            f"Base URL           : {h['base_url']}",
+            f"Model              : {h['model']}",
             "",
-            f"Connection      : {h['connection']}",
-            f"Completion      : {h['completion']}",
-            f"Structured JSON : {h['structured_json']}",
-            f"Latency         : {h['latency']}s",
+            f"Server reachable   : {h['server_reachable']}",
+            f"Models endpoint    : {h['models_endpoint']}",
+            f"Chat endpoint      : {h['chat_endpoint']}",
+            f"Authentication     : {h['authentication']}",
+            f"Simple completion  : {h['simple_completion']}",
+            f"Structured JSON    : {h['structured_json']}",
+            f"Latency            : {h['latency']}s",
         ]
+        if h["available_models"]:
+            lines.append(f"Available models   : {', '.join(h['available_models'])}")
         if h["error"]:
-            lines.append(f"Error Details   : {h['error']}")
+            lines.append(f"Error details      : {h['error']}")
+
+        if h["server_reachable"] == "NO":
+            lines.extend([
+                "",
+                "RECOMMENDED .ENV DIAGNOSTIC:",
+                "------------------------------------------------------------",
+                f"1. No local LLM service is running on {h['base_url']}",
+                "2. Please start your local FreeLLMAPI / Ollama / LM Studio server.",
+                "3. Ensure your server exposes an OpenAI-compatible API.",
+                "4. Update .env variables once your local server is running:",
+                "   LLM_PROVIDER=freellmapi",
+                "   LLM_BASE_URL=http://localhost:<YOUR_PORT>/v1",
+                "   LLM_API_KEY=<YOUR_KEY>",
+                "   LLM_MODEL=<AVAILABLE_MODEL_ID>"
+            ])
         lines.append("============================================================")
         return "\n".join(lines)
 
