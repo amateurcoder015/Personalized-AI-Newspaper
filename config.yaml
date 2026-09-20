@@ -1,0 +1,114 @@
+user:
+  name: "Tony Stark"
+  interests:
+    - Indian stock market
+    - Indian economy
+    - Global financial markets
+    - Investment banking
+    - Finance
+    - Corporate news
+    - AI
+    - Technology
+    - Software
+    - Startups
+    - Major global economic developments
+  companies:
+    - Reliance
+    - HDFC Bank
+    - TCS
+    - Infosys
+    - NVIDIA
+    - Microsoft
+    - Apple
+    - Alphabet
+  markets:
+    - NIFTY 50
+    - SENSEX
+    - BANK NIFTY
+    - NASDAQ
+    - S&P 500
+    - Dow Jones
+    - USD/INR
+    - 10Y Indian G-Sec
+    - 10Y US Treasury
+    - Crude Oil
+  sectors:
+    - Banking & Financial Services
+    - Information Technology
+    - Healthcare & Pharma
+    - Automobiles
+    - Power & Utilities
+    - Industrials
+    - Infrastructure
+    - Telecom
+    - FMCG
+    - Energy
+    - Metals & Mining
+    - Real Estate
+    - Chemicals
+
+newspaper:
+  daily:
+    top_stories: 5
+    max_total_stories: 25
+    target_reading_minutes: 15
+  weekly:
+    github_finds: true
+    github_count: 5
+    weekly_theme: true
+
+sections:
+  top_stories: true
+  india_economy: true
+  markets: true
+  gold_silver: true
+  sector_watch: true
+  companies: true
+  global_economy: true
+  ai_technology: true
+  github_finds: true
+  connect_the_dots: true
+  what_to_watch: true
+  finance_concept: true
+
+llm:
+  max_daily_calls: 15
+  cache_enabled: true
+  max_article_words: 800
+  batch_processing: true
+
+learning:
+  finance_concept: true
+  max_concept_words: 250
+  avoid_recent_concepts_days: 30
+
+ranking:
+  watchlist_match_weight: 3.0
+  major_event_weight: 3.0
+  multiple_sources_weight: 2.0
+  recency_weight: 2.0
+  market_impact_weight: 2.0
+  topic_match_weight: 1.0
+  global_importance_weight: 0.55
+  personal_relevance_weight: 0.45
+
+sources:
+  india_business:
+    - name: Moneycontrol Top News
+      url: https://www.moneycontrol.com/rss/MCtopnews.xml
+    - name: Economic Times Top Stories
+      url: https://economictimes.indiatimes.com/rssfeedstopstories.cms
+    - name: Livemint Markets
+      url: https://www.livemint.com/rss/markets
+  technology:
+    - name: TechCrunch
+      url: https://techcrunch.com/feed/
+    - name: Hacker News Best
+      url: https://news.ycombinator.com/rss
+    - name: Ars Technica
+      url: https://feeds.arstechnica.com/arstechnica/index
+  global_finance:
+    - name: CNBC Top News
+      url: https://search.cnbc.com/rs/search/combined/server/settings/feeds.jsp?id=100003114&format=xml
+    - name: Financial Times World
+      url: https://www.ft.com/world?format=rss
