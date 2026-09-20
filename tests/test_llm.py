@@ -8,7 +8,18 @@ class MockLLMProvider(LLMProvider):
         return "Mock generated text."
 
     def generate_structured(self, prompt: str, schema=None, system_prompt=None):
-        if "Synthesize" in prompt:
+        if "causal" in prompt.lower() or "connection" in prompt.lower() or "connect" in prompt.lower():
+            return {
+                "connections": [
+                    {
+                        "title": "Yield Movements and Gold Pricing",
+                        "premise": "Rising bond yields increased opportunity costs for non-yielding assets.",
+                        "chain_steps": ["Yields ↑", "USD ↑", "Gold pressure"],
+                        "why_matters": "Illustrates monetary transmission into commodity pricing."
+                    }
+                ]
+            }
+        elif "Synthesize" in prompt:
             return {
                 "headline": "RBI Maintains Repo Rate at 6.5%",
                 "summary": "The Reserve Bank of India kept borrowing costs unchanged today.",
@@ -19,17 +30,6 @@ class MockLLMProvider(LLMProvider):
             return {
                 "gold_driver": "Gold prices held steady as central bank rate expectations adjusted.",
                 "silver_driver": "Silver tracked precious metal market sentiment."
-            }
-        elif "causal" in prompt.lower() or "connection" in prompt.lower():
-            return {
-                "connections": [
-                    {
-                        "title": "Yield Movements and Gold Pricing",
-                        "premise": "Rising bond yields increased opportunity costs for non-yielding assets.",
-                        "chain_steps": ["Yields ↑", "USD ↑", "Gold pressure"],
-                        "why_matters": "Illustrates monetary transmission into commodity pricing."
-                    }
-                ]
             }
         elif "Concept" in prompt:
             return {
@@ -44,6 +44,7 @@ class MockLLMProvider(LLMProvider):
                 "why_it_matters": "Key implication for investors.",
                 "topics": ["Finance"]
             }
+
 
 
 def test_llm_editor_process_story():

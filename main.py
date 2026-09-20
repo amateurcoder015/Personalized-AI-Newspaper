@@ -41,9 +41,7 @@ def main():
         return
 
     if args.test_llm:
-        logger.info("Testing LLM Provider Connection...")
-        res = pipeline.llm_provider.generate("Say 'Hello Executive Daily Brief!'")
-        logger.info(f"LLM Response: {res}")
+        print(pipeline.llm_provider.get_formatted_health_report())
         return
 
     if args.collect:
@@ -85,13 +83,17 @@ def main():
     else:
         print(f"Email Sent     : {result['email_sent']}")
     print("-" * 60)
-    print("LLM TOKEN & COST ACCOUNTING")
+    print("LLM USAGE & DIAGNOSTICS")
     print(f"Calls          : {usage.get('calls', 0)}")
-    print(f"Input Tokens   : {usage.get('input_tokens', 0)}")
-    print(f"Output Tokens  : {usage.get('output_tokens', 0)}")
+    print(f"Successful     : {usage.get('successful', 0)}")
+    print(f"Failed         : {usage.get('failed', 0)}")
+    print(f"Fallback       : {usage.get('fallback', 0)}")
     print(f"Cache Hits     : {usage.get('cache_hits', 0)}")
-    print(f"Est. Cost      : {usage.get('estimated_cost', '$0.00')}")
+    print(f"Input Tokens   : {usage.get('input_tokens', 0):,} (estimated)")
+    print(f"Output Tokens  : {usage.get('output_tokens', 0):,} (estimated)")
+    print(f"Estimated Cost : {usage.get('estimated_cost', '$0.00')}")
     print("=" * 60 + "\n")
+
 
 
 if __name__ == "__main__":

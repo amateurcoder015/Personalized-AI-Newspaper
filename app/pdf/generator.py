@@ -64,43 +64,58 @@ class PDFGenerator:
         html_path = Path(edition.html_path).resolve()
         logger.info(f"HTML Newspaper rendered at {html_path}. Generating Playwright PDF...")
 
-        # 2. Render to PDF via Playwright
-        chrome_app_path = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+        tmp_dir = BASE_DIR / "data" / "tmp"
+        tmp_dir.mkdir(parents=True, exist_ok=True)
+        os.environ["TMPDIR"] = str(tmp_dir)
         
-        with tempfile.TemporaryDirectory() as tmpdir:
-            with sync_playwright() as p:
-                if os.path.exists(chrome_app_path):
-                    context = p.chromium.launch_persistent_context(
-                        tmpdir,
-                        executable_path=chrome_app_path,
-                        headless=True
-                    )
-                else:
-                    context = p.chromium.launch_persistent_context(
-                        tmpdir,
-                        headless=True
-                    )
-                
-                page = context.pages[0] if context.pages else context.new_page()
-                file_url = f"file://{html_path}"
-                page.goto(file_url, wait_until="networkidle")
-
-                # Allow any web fonts / styles to stabilize
-                page.wait_for_timeout(500)
-
-                pdf_bytes = page.pdf(
-                    format="A4",
-                    print_background=True,
-                    prefer_css_page_size=True
+        chrome_profile_dir = BASE_DIR / "data" / "chrome_profile"
+        chrome_profile_dir.mkdir(parents=True, exist_ok=True)
+        
+        chrome_app_path = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+        launch_args = [
+            "--no-sandbox",
+            "--disable-gpu",
+            "--disable-dev-shm-usage",
+            "--disable-crash-reporter",
+            "--disable-breakpad",
+            "--single-process"
+        ]
+        
+        with sync_playwright() as p:
+            if os.path.exists(chrome_app_path):
+                context = p.chromium.launch_persistent_context(
+                    user_data_dir=str(chrome_profile_dir),
+                    executable_path=chrome_app_path,
+                    headless=True,
+                    args=launch_args
                 )
-                
-                with open(pdf_path, "wb") as f:
-                    f.write(pdf_bytes)
-                
-                with open(named_pdf_path, "wb") as f:
-                    f.write(pdf_bytes)
-                
-                context.close()
+            else:
+                context = p.chromium.launch_persistent_context(
+                    user_data_dir=str(chrome_profile_dir),
+                    headless=True,
+                    args=launch_args
+                )
+            
+            page = context.pages[0] if context.pages else context.new_page()
+            file_url = f"file://{html_path}"
+            page.goto(file_url, wait_until="networkidle")
+
+            # Allow any web fonts / styles to stabilize
+            page.wait_for_timeout(500)
+
+            pdf_bytes = page.pdf(
+                format="A4",
+                print_background=True,
+                prefer_css_page_size=True
+            )
+            
+            with open(pdf_path, "wb") as f:
+                f.write(pdf_bytes)
+            
+            with open(named_pdf_path, "wb") as f:
+                f.write(pdf_bytes)
+            
+            context.close()
 
         logger.info(f"Playwright PDF generated successfully: {pdf_path} ({len(pdf_bytes)} bytes)")
         return str(pdf_path.resolve())

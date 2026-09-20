@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class LLMEditor:
     """Editorial AI engine that refines stories, assigns sections, generates Gold/Silver drivers,
     Connect the Dots causal chains, market move explanations, and Finance Concept explanations.
-    Degrades gracefully if LLM API fails or returns invalid JSON.
+    Uses purely factual source text fallback when LLM API fails or returns invalid JSON.
     """
 
     def __init__(self, provider: LLMProvider):
@@ -56,11 +56,14 @@ class LLMEditor:
                 prompt = STORY_SYNTHESIS_PROMPT.format(articles_text=articles_text)
                 res = self.provider.generate_structured(prompt, system_prompt=SYSTEM_EDITORIAL_PROMPT)
 
-                story.headline = res.get("headline", story.headline)
-                story.summary = res.get("summary", story.summary)
-                story.why_it_matters = res.get("why_it_matters", f"Key implications affecting credit growth, market sentiment, and corporate operations.")
-                if "category" in res and res["category"] in ["top_stories", "india", "markets", "companies", "technology", "global"]:
-                    story.category = res["category"]
+                if res:
+                    story.headline = res.get("headline", story.headline)
+                    story.summary = res.get("summary", story.summary)
+                    story.why_it_matters = res.get("why_it_matters", "")
+                    if "category" in res and res["category"] in ["top_stories", "india", "markets", "companies", "technology", "global"]:
+                        story.category = res["category"]
+                else:
+                    self._apply_factual_fallback(story)
 
             else:
                 primary = story.articles[0] if story.articles else None
@@ -75,17 +78,33 @@ class LLMEditor:
                 )
                 res = self.provider.generate_structured(prompt, system_prompt=SYSTEM_EDITORIAL_PROMPT)
 
-                story.summary = res.get("summary", story.summary or title)
-                story.why_it_matters = res.get("why_it_matters", f"Direct impact on sectoral outlook, valuation multiples, and broader economic activity.")
+                if res:
+                    story.summary = res.get("summary", title)
+                    story.why_it_matters = res.get("why_it_matters", "")
+                else:
+                    self._apply_factual_fallback(story)
 
         except Exception as e:
-            logger.warning(f"LLM process_story failed ({e}). Using deterministic fallback.")
-            if not story.summary and story.articles:
-                story.summary = story.articles[0].description or story.articles[0].title
-            if not story.why_it_matters:
-                story.why_it_matters = f"Key development with implications for {story.sources[0] if story.sources else 'markets'}."
+            logger.warning(f"LLM process_story failed for '{story.headline[:40]}' ({e}). Using factual source fallback.")
+            self._apply_factual_fallback(story)
 
         return story
+
+    def _apply_factual_fallback(self, story: Story) -> None:
+        """Apply strictly factual source headline and description without inventing AI text."""
+        if story.articles:
+            primary = story.articles[0]
+            if primary.description:
+                story.summary = primary.description
+            elif primary.content:
+                story.summary = primary.content[:300]
+            else:
+                story.summary = primary.title
+        elif not story.summary:
+            story.summary = story.headline
+
+        # Clear invented why_it_matters on fallback
+        story.why_it_matters = ""
 
     def assign_section(self, story: Story) -> str:
         text = f"{story.headline} {story.summary}".lower()
@@ -104,7 +123,7 @@ class LLMEditor:
             return story.category or "india"
 
     def generate_why_did_markets_move(self, major_moves: List[Dict[str, Any]], headlines_summary: str) -> List[str]:
-        """Generate prudent market drivers using non-dogmatic phrasing."""
+        """Generate prudent market drivers using non-dogmatic phrasing. Return [] if LLM fails."""
         if not major_moves:
             return []
 
@@ -124,13 +143,9 @@ class LLMEditor:
             if isinstance(drivers, list) and len(drivers) > 0:
                 return drivers[:3]
         except Exception as e:
-            logger.warning(f"LLM generate_why_did_markets_move failed ({e}). Using prudent fallback drivers.")
+            logger.warning(f"LLM generate_why_did_markets_move failed ({e}). Returning empty drivers list.")
 
-        return [
-            f"Market commentary points to institutional rebalancing across benchmark indices following economic data signals.",
-            f"Reported drivers include shifting bond yield expectations and currency exchange rate adjustments.",
-            f"The move coincided with quarterly corporate earnings updates and sectoral capital flows."
-        ]
+        return []
 
     def edit_stories(
         self,
@@ -145,11 +160,11 @@ class LLMEditor:
             processed = self.process_story(s)
             edited_stories.append(processed)
 
-        # 1. TOP 5 Section (strictly 5 stories max)
+        # 1. TOP Stories Section
         top_stories = edited_stories[:top_limit]
         top_ids = {s.id for s in top_stories}
 
-        # Remaining stories not in Top 5
+        # Remaining stories
         remaining = [s for s in edited_stories if s.id not in top_ids]
 
         # 2. Main Sections
@@ -193,16 +208,15 @@ class LLMEditor:
         try:
             prompt = GOLD_SILVER_DRIVER_PROMPT.format(headlines_summary=headlines_summary)
             res = self.provider.generate_structured(prompt, system_prompt=SYSTEM_EDITORIAL_PROMPT)
-            return {
-                "gold_driver": res.get("gold_driver", "Gold prices held steady as market participants weighed global rate expectations, inflation outlooks, and central bank reserve accumulation."),
-                "silver_driver": res.get("silver_driver", "Silver price action reflected precious metal sentiment alongside industrial manufacturing demand expectations.")
-            }
+            if res and ("gold_driver" in res or "silver_driver" in res):
+                return {
+                    "gold_driver": res.get("gold_driver", ""),
+                    "silver_driver": res.get("silver_driver", "")
+                }
         except Exception as e:
-            logger.warning(f"LLM generate_gold_silver_drivers failed ({e}). Using fallback.")
-            return {
-                "gold_driver": "Gold prices held steady as market participants weighed global rate expectations, inflation outlooks, and central bank reserve accumulation.",
-                "silver_driver": "Silver price action reflected precious metal sentiment alongside industrial manufacturing demand expectations."
-            }
+            logger.warning(f"LLM generate_gold_silver_drivers failed ({e}). Returning empty drivers.")
+
+        return {"gold_driver": "", "silver_driver": ""}
 
     def generate_connect_the_dots(self, headlines_summary: str) -> List[CausalConnection]:
         try:
@@ -215,21 +229,16 @@ class LLMEditor:
                 for c in raw_connections:
                     connections.append(CausalConnection(
                         title=c.get("title", "Yield Movements & Emerging Market Assets"),
-                        premise=c.get("premise", "Shifting central bank policy rate expectations influenced bond yields and foreign currency valuations."),
-                        chain_steps=c.get("chain_steps", ["US Yields Adjust", "Dollar Index Shifts", "Emerging Market Currencies React", "Impact on Domestic Inflation"]),
-                        why_matters=c.get("why_matters", "Monetary policy shifts in major economies propagate through cross-border trade, capital flows, and asset pricing.")
+                        premise=c.get("premise", "Shifting rate expectations influenced yields and currencies."),
+                        chain_steps=c.get("chain_steps", ["US Yields ↑", "Dollar Index ↑", "EM Currencies ↓", "Gold / India Impact"]),
+                        why_matters=c.get("why_matters", "Monetary policy stance propagates through FX and asset valuations.")
                     ))
             if connections:
                 return connections
         except Exception as e:
-            logger.warning(f"LLM generate_connect_the_dots failed ({e}). Using fallback causal chain.")
+            logger.warning(f"LLM generate_connect_the_dots failed ({e}). Returning empty causal connections.")
 
-        return [CausalConnection(
-            title="Yield Movements & Emerging Market Assets",
-            premise="Shifting central bank policy rate expectations influenced bond yields and foreign currency valuations.",
-            chain_steps=["US Yields Adjust", "Dollar Index Shifts", "Emerging Market Currencies React", "Impact on Domestic Inflation"],
-            why_matters="Monetary policy shifts in major economies propagate through cross-border trade, capital flows, and asset pricing."
-        )]
+        return []
 
     def generate_finance_concept_editorial(self, chosen_concept: Dict[str, Any], headlines_summary: str) -> Dict[str, Any]:
         try:
@@ -241,17 +250,20 @@ class LLMEditor:
             )
             res = self.provider.generate_structured(prompt, system_prompt=SYSTEM_EDITORIAL_PROMPT)
 
-            return {
-                "concept": res.get("concept", chosen_concept["concept"]),
-                "explanation": res.get("explanation", chosen_concept["explanation"]),
-                "why_relevant_today": res.get("why_relevant_today", "Today's financial developments illustrate how this fundamental concept affects market asset valuations."),
-                "numerical_example": res.get("numerical_example", chosen_concept["numerical_example"])
-            }
+            if res and "concept" in res:
+                return {
+                    "concept": res.get("concept", chosen_concept["concept"]),
+                    "explanation": res.get("explanation", chosen_concept["explanation"]),
+                    "why_relevant_today": res.get("why_relevant_today", "Today's developments illustrate how this concept impacts asset pricing."),
+                    "numerical_example": res.get("numerical_example", chosen_concept["numerical_example"])
+                }
         except Exception as e:
-            logger.warning(f"LLM generate_finance_concept_editorial failed ({e}). Using fallback.")
-            return {
-                "concept": chosen_concept["concept"],
-                "explanation": chosen_concept["explanation"],
-                "why_relevant_today": "Today's financial developments illustrate how this fundamental concept affects market asset valuations.",
-                "numerical_example": chosen_concept["numerical_example"]
-            }
+            logger.warning(f"LLM generate_finance_concept_editorial failed ({e}). Returning base concept data.")
+
+        return {
+            "concept": chosen_concept["concept"],
+            "explanation": chosen_concept["explanation"],
+            "why_relevant_today": "Today's developments illustrate how this concept impacts asset pricing.",
+            "numerical_example": chosen_concept["numerical_example"]
+        }
+
