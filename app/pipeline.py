@@ -11,7 +11,7 @@ from app.collectors.commodities import CommodityCollector
 from app.collectors.github import GithubCollector
 from app.collectors.economic_calendar import EconomicCalendarCollector
 from app.processing import ArticleCleaner, ArticleDeduplicator, StoryClusterer, StoryRanker, ChangeDetector
-from app.llm import FreeLLMAPIProvider, LLMEditor
+from app.llm import FreeLLMAPIProvider, GeminiProvider, LLMEditor
 from app.llm.cache import LLMCache
 from app.learning.concept_selector import ConceptSelector
 from app.newspaper import NewspaperGenerator
@@ -56,12 +56,21 @@ class NewspaperPipeline:
             avoid_recent_days=self.config.learning.avoid_recent_concepts_days
         )
 
-        self.llm_provider = FreeLLMAPIProvider(
-            base_url=self.config.llm_base_url,
-            api_key=self.config.llm_api_key,
-            model=self.config.llm_model,
-            cache=self.cache
-        )
+        provider_name = self.config.llm_provider.lower()
+        if provider_name == "gemini":
+            self.llm_provider = GeminiProvider(
+                base_url=self.config.llm_base_url,
+                api_key=self.config.llm_api_key,
+                model=self.config.llm_model,
+                cache=self.cache
+            )
+        else:
+            self.llm_provider = FreeLLMAPIProvider(
+                base_url=self.config.llm_base_url,
+                api_key=self.config.llm_api_key,
+                model=self.config.llm_model,
+                cache=self.cache
+            )
         self.editor = LLMEditor(provider=self.llm_provider)
         self.html_generator = NewspaperGenerator(output_dir=self.config.editions_dir)
         self.pdf_generator = PDFGenerator(output_dir=self.config.editions_dir)
